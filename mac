@@ -72,10 +72,10 @@ brew_tap() {
 gem_install_or_update() {
   if gem list "$1" | grep "^$1 ("; then
     fancy_echo "Updating %s ..." "$1"
-    gem update "$@"
+    sudo gem update "$@"
   else
     fancy_echo "Installing %s ..." "$1"
-    gem install "$@"
+    sudo gem install "$@"
   fi
 }
 
@@ -126,18 +126,6 @@ else
 fi
 
 brew_install_or_upgrade 'git'
-
-#brew_tap 'gapple/services'
-
-#brew_install_or_upgrade 'postgresql'
-fancy_echo 'Restarting postgres...'
-#brew services restart postgresql
-
-#brew_install_or_upgrade 'phantomjs'
-
-#brew_install_or_upgrade 'hub'
-# shellcheck disable=SC2016
-#append_to_file "$HOME/.zshrc" 'eval "$(hub alias -s)"'
 
 append_to_file "$HOME/.gemrc" 'gem: --no-document'
 
