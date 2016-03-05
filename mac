@@ -1,9 +1,5 @@
 #!/bin/sh
 
-# Welcome to the monfresh laptop script!
-# Be prepared to turn your laptop (or desktop)
-# into an awesome development machine.
-
 fancy_echo() {
   local fmt="$1"; shift
 
@@ -144,17 +140,17 @@ fi
 
 brew_install_or_upgrade 'git'
 
-brew_tap 'gapple/services'
+#brew_tap 'gapple/services'
 
-brew_install_or_upgrade 'postgresql'
+#brew_install_or_upgrade 'postgresql'
 fancy_echo 'Restarting postgres...'
-brew services restart postgresql
+#brew services restart postgresql
 
-brew_install_or_upgrade 'phantomjs'
+#brew_install_or_upgrade 'phantomjs'
 
-brew_install_or_upgrade 'hub'
+#brew_install_or_upgrade 'hub'
 # shellcheck disable=SC2016
-append_to_file "$HOME/.zshrc" 'eval "$(hub alias -s)"'
+#append_to_file "$HOME/.zshrc" 'eval "$(hub alias -s)"'
 
 append_to_file "$HOME/.gemrc" 'gem: --no-document'
 
@@ -178,23 +174,28 @@ fi
 fancy_echo 'Updating Rubygems...'
 gem update --system
 
-gem_install_or_update 'bundler'
+gem_install_or_update 'sinatra'
+gem_install_or_update 'sinatra-contrib'
+gem_install_or_update 'cert'
+gem_install_or_update 'spaceship'
+gem_install_or_update 'open4'
 
-fancy_echo "Configuring Bundler ..."
-  number_of_cores=$(sysctl -n hw.ncpu)
-  bundle config --global jobs $((number_of_cores - 1))
+brew_install_or_upgrade 'python3'
+/usr/local/share/python/easy_install pip
+pip install tornado
+pip install icons
 
-brew_install_or_upgrade 'heroku-toolbelt'
+#brew_install_or_upgrade 'heroku-toolbelt'
 
 brew_tap 'caskroom/cask'
-
 brew_install_or_upgrade 'brew-cask'
-
 brew_tap 'caskroom/versions'
 
-brew_cask_install 'flux'
-brew_cask_install 'github-desktop'
-brew_cask_install 'sublime-text3'
+brew_cask_install 'atom'
+brew_cask_install 'xamarin'
+brew_cask_install 'xamarin-mdk'
+brew_cask_install 'xamarin-studio'
+brew_cask_install 'xamarin-ios'
 
 if [ -f "$HOME/.laptop.local" ]; then
   . "$HOME/.laptop.local"
@@ -203,20 +204,4 @@ fi
 append_to_file "$HOME/.rvmrc" 'rvm_auto_reload_flag=2'
 append_to_file "$HOME/.rvm/gemsets/global.gems" 'bundler'
 
-# display pwd in orange, current ruby version or gemset in green,
-# and set prompt character to $
-# shellcheck disable=SC2016
-append_to_file "$HOME/.zshrc" 'precmd () { PS1="%{%F{166}%}[%~] %{%F{65}%}$(rvm-prompt) %{%f%}$ " }'
-
-# display directories and files in different colors when running ls
-append_to_file "$HOME/.zshrc" 'export CLICOLOR=1;'
-append_to_file "$HOME/.zshrc" 'export LSCOLORS=exfxcxdxbxegedabagacad;'
-
-if app_is_installed 'GitHub'; then
-  fancy_echo "It looks like you've already configured your GitHub SSH keys."
-  fancy_echo "If not, you can do it by signing in to the GitHub app on your Mac."
-elif [ ! -f "$HOME/.ssh/github_rsa.pub" ]; then
-  open ~/Applications/GitHub\ Desktop.app
-fi
-
-fancy_echo 'All done!'
+fancy_echo 'All done! Still need to install Xcode'
