@@ -33,20 +33,8 @@ if [ ! -d "$HOME/.bin/" ]; then
   mkdir "$HOME/.bin"
 fi
 
-if [ ! -f "$HOME/.zshrc" ]; then
-  touch "$HOME/.zshrc"
-fi
-
 # shellcheck disable=SC2016
 append_to_file "$HOME/.zshrc" 'export PATH="$HOME/.bin:$PATH"'
-
-case "$SHELL" in
-  */zsh) : ;;
-  *)
-    fancy_echo "Changing your shell to zsh ..."
-      chsh -s "$(which zsh)"
-    ;;
-esac
 
 brew_install_or_upgrade() {
   if brew_is_installed "$1"; then
@@ -121,7 +109,6 @@ if ! command -v brew >/dev/null; then
     curl -fsS \
       'https://raw.githubusercontent.com/Homebrew/install/master/install' | ruby
 
-    # shellcheck disable=SC2016
     append_to_file "$HOME/.zshrc" 'export PATH="/usr/local/bin:$PATH"'
 else
   fancy_echo "Homebrew already installed. Skipping ..."
@@ -172,7 +159,7 @@ if ! command -v rbenv >/dev/null; then
 fi
 
 fancy_echo 'Updating Rubygems...'
-gem update --system
+sudo gem update --system
 
 gem_install_or_update 'sinatra'
 gem_install_or_update 'sinatra-contrib'
@@ -204,4 +191,44 @@ fi
 append_to_file "$HOME/.rvmrc" 'rvm_auto_reload_flag=2'
 append_to_file "$HOME/.rvm/gemsets/global.gems" 'bundler'
 
-fancy_echo 'All done! Still need to install Xcode'
+brew_install_or_upgrade 'wget'
+fancy_echo "Done with everything but Xcode. Sit back and watch the show..."
+wget 'http://adcdownload.apple.com/Developer_Tools/Xcode_7.2/Xcode_7.2.dmg'
+fancy_echo "Done installing Xcode."
+
+fancy_echo 'Done with package installing'
+
+fancy_echo "Opening Xcode so you can enter credentials and confirm TOS"
+open /Applications/Xcode.app
+
+read -p "Press Y once done with Xcode. " -n 1 -r
+echo    # (optional) move to a new line
+if [[ ! $REPLY =~ ^[Yy]$ ]]
+then
+    exit 1
+fi
+
+fancy_echo "Generating ssh key. You will need to manually insert this key into the server git user. Run cat ~/.ssh/id_rsa.pub to see it."
+ssh-keygen -t rsa -C "server"
+
+read -p "Press Y once done with inserting ssh key. " -n 1 -r
+echo    # (optional) move to a new line
+if [[ ! $REPLY =~ ^[Yy]$ ]]
+then
+    exit 1
+fi
+
+
+cd ~/
+git clone git@git.mentortek.com:dnimon/meteorMaker.git
+git clone git@git.mentortek.com:dnimon/startup-scripts.git
+fancy_echo "Git repo should be available now."
+
+cd ~/startup-scripts
+chmod 755 macSetup.sh
+./macSetup.sh
+fancy_echo "startup scripts enabled. Services should now be running."
+
+fancy_echo "All done!"
+
+
